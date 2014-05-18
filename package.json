@@ -1,0 +1,37 @@
+{
+  "name": "project-cluster",
+  "version": "1.0.0",
+  "description": "Module to make watch over different processes in application",
+  "homepage": "https://github.com/lltwox/project-cluster",
+  "keywords": [
+    "cluster"
+  ],
+  "author": "Alexander Golubev <lltwox@gmail.com>",
+  "main": "./lib/cluster.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lltwox/project-cluster.git"
+  },
+  "scripts": {
+    "test": "NODE_ENV=test ./node_modules/.bin/mocha --reporter dot"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "async": "^0.8.0",
+    "colors": "^0.6.2",
+    "commander": "^2.2.0",
+    "express": "^4.2.0",
+    "lodash": "^2.4.1",
+    "moment": "^2.6.0",
+    "project-logger": "git://github.com/lltwox/project-logger#master",
+    "request": "^2.36.0",
+    "sprintf-js": "0.0.7"
+  },
+  "devDependencies": {
+    "mocha": "^1.18.2",
+    "should": "^3.3.1"
+  },
+  "engines": {
+    "node": ">=0.10"
+  }
+}

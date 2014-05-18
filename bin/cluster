@@ -1,0 +1,210 @@
+#!/usr/bin/env node
+
+var fs = require('fs'),
+    path = require('path'),
+    program = require('commander'),
+    request = require('request'),
+    _ = require('lodash'),
+    sprintf = require('sprintf-js').sprintf,
+    colors = require('colors'),
+
+    defaults = require('../lib/process').DEFAULT_OPTIONS,
+    pkg = require('../package.json');
+
+var CONFIG_FILENAME = '.cluster.json';
+
+var config = _.merge(defaults.api, getUserConfig());
+
+program
+    .version(pkg.version)
+    .description('Cli tool to manage cluster')
+    .usage('<command>');
+
+program
+    .command('stat')
+    .description('Get list and status of running processes')
+    .action(function() {
+        apiRequest('/stat');
+    });
+
+program
+    .command('add <type>')
+    .description('Add one more worker of a given type')
+    .action(function(type) {
+        apiRequest('/' + type + '/add');
+    });
+
+program
+    .command('start <selector>')
+    .description('Start workers specified by uid, type or all keyword')
+    .action(function(selector) {
+        apiRequest('/' + selector + '/start');
+    });
+
+program
+    .command('restart <selector>')
+    .description('Restart workers specified by uid, type or all keyword')
+    .action(function(selector) {
+        apiRequest('/' + selector + '/restart');
+    });
+
+program
+    .command('stop <selector>')
+    .description('Stop workers specified by uid, type or all keyword')
+    .action(function(selector) {
+        apiRequest('/' + selector + '/stop');
+    });
+
+program
+    .command('reset <selector>')
+    .description('Reset stat data for worker specified by uid, type or all keyword')
+    .action(function(selector) {
+        apiRequest('/' + selector + '/reset');
+    });
+
+program
+    .command('remove <selector>')
+    .description('Remove stopped process from stats by uid of type')
+    .action(function(selector) {
+        apiRequest('/' + selector + '/remove');
+    });
+
+program.parse(process.argv);
+if (process.argv.length < 3) {
+    program.help();
+}
+
+/**
+ * Get config options
+ *
+ * @return {Object}
+ */
+function getUserConfig() {
+    if (fs.existsSync(path.join(process.argv[1], CONFIG_FILENAME))) {
+        return require(path.join(process.argv[1], CONFIG_FILENAME));
+    }
+
+    if (fs.existsSync(path.join(process.cwd(), CONFIG_FILENAME))) {
+        return require(path.join(process.cwd(), CONFIG_FILENAME));
+    }
+
+    return {};
+}
+
+/**
+ * Make a request to cluster api
+ *
+ * @param  {String} path
+ */
+function apiRequest(path) {
+    var url = 'http://' + config.host + ':' + config.port
+        + path
+        + '?secret=' + config.secret;
+
+    request(url, function(err, response, body) {
+        if (err) {
+            return console.log('' + err);
+        }
+        if (response.statusCode != 200) {
+            return console.log(body);
+        }
+
+        var data = JSON.parse(body);
+        if (!data || (Array.isArray(data) && !data.length)) {
+            console.log('No results');
+        } else {
+            printStat(data);
+        }
+    });
+}
+
+/**
+ * Print nicely-looking statistics about running process
+ *
+ * @param  {Array|Object} data
+ */
+function printStat(data) {
+    if (!Array.isArray(data)) {
+        data = [data];
+    }
+
+    data.sort(function(first, second) {
+        if (first.uid > second.uid) {
+            return 1;
+        } else if (first.uid == second.uid) {
+            return 0;
+        } else {
+            return -1;
+        }
+    });
+
+    var headers = {
+        uid: 'uid',
+        id: 'id',
+        type: 'type',
+        pid: 'pid',
+        restarted: 'crash',
+        errors: 'err',
+        warnings: 'warn',
+        status: 'status',
+        uptime: 'uptime'
+    };
+
+    console.log();
+    console.log(colors.grey(sprintf(
+        '%(uid)12s%(id)8s%(type)10s%(pid)8s%(restarted)8s'
+            + '%(errors)8s%(warnings)8s%(status)10s%(uptime)16s',
+        headers
+    )));
+    console.log();
+    data.forEach(function(entry) {
+        process.stdout.write(sprintf('%(uid)12s', entry));
+
+        if (entry.id) {
+            process.stdout.write(colors.grey(sprintf('%(id)8s', entry)));
+        } else {
+            process.stdout.write(colors.grey(sprintf('%8s', '')));
+        }
+
+        process.stdout.write(colors.grey(sprintf('%(type)10s', entry)));
+
+        if (entry.pid) {
+            process.stdout.write(colors.grey(sprintf('%(pid)8s', entry)));
+        } else {
+            process.stdout.write(colors.grey(sprintf('%8s', '')));
+        }
+
+        if (entry.restarted === 0) {
+            process.stdout.write(colors.grey(sprintf('%(restarted)8s', entry)));
+        } else {
+            process.stdout.write(colors.red(sprintf('%(restarted)8s', entry)));
+        }
+
+        if (entry.errors) {
+            process.stdout.write(colors.red(sprintf('%(errors)8s', entry)));
+        } else {
+            process.stdout.write(colors.grey(sprintf('%(errors)8s', entry)));
+        }
+
+        if (entry.warnings) {
+            process.stdout.write(colors.yellow(sprintf('%(warnings)8s', entry)));
+        } else {
+            process.stdout.write(colors.grey(sprintf('%(warnings)8s', entry)));
+        }
+
+        if (entry.status == 'online') {
+            process.stdout.write(colors.green(sprintf('%(status)10s', entry)));
+        } else {
+            process.stdout.write(colors.red(sprintf('%(status)10s', entry)));
+        }
+
+        if (entry.uptime) {
+            process.stdout.write(colors.yellow(sprintf('%(uptime)16s', entry)));
+        } else {
+            process.stdout.write(colors.grey(sprintf('%16s', '')));
+        }
+
+        process.stdout.write('\n');
+    });
+    console.log();
+}
