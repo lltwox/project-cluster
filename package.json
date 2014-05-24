@@ -1,13 +1,22 @@
 {
   "name": "project-cluster",
   "version": "1.0.0",
-  "description": "Module to make watch over different processes in application",
+  "description": "Module to watch over different processes, that application consists of",
   "homepage": "https://github.com/lltwox/project-cluster",
   "keywords": [
-    "cluster"
+    "cluster",
+    "cli",
+    "appliction manager",
+    "fault tolerant",
+    "monitoring",
+    "process manager",
+    "tools"
   ],
   "author": "Alexander Golubev <lltwox@gmail.com>",
   "main": "./lib/cluster.js",
+  "bin": {
+    "cluster": "./bin/cluster"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/lltwox/project-cluster.git"
