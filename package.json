@@ -1,6 +1,6 @@
 {
   "name": "project-cluster",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Module to watch over different processes, that application consists of",
   "homepage": "https://github.com/lltwox/project-cluster",
   "keywords": [
@@ -10,10 +10,12 @@
     "fault tolerant",
     "monitoring",
     "process manager",
-    "tools"
+    "tools",
+    "uptime",
+    "reload"
   ],
   "author": "Alexander Golubev <lltwox@gmail.com>",
-  "main": "./lib/cluster.js",
+  "main": "./lib",
   "bin": {
     "cluster": "./bin/cluster"
   },
@@ -32,7 +34,7 @@
     "express": "^4.2.0",
     "lodash": "^2.4.1",
     "moment": "^2.6.0",
-    "project-logger": "git://github.com/lltwox/project-logger#master",
+    "project-logger": "^1.0.2",
     "request": "^2.36.0",
     "sprintf-js": "0.0.7"
   },

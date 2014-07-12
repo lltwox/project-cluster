@@ -24,49 +24,49 @@ program
     .command('stat')
     .description('Get list and status of running processes')
     .action(function() {
-        apiRequest('/stat');
+        apiGetRequest('/stat');
     });
 
 program
     .command('add <type>')
     .description('Add one more worker of a given type')
     .action(function(type) {
-        apiRequest('/' + type + '/add');
+        apiPostRequest('/' + type + '/add');
     });
 
 program
     .command('start <selector>')
     .description('Start workers specified by uid, type or all keyword')
     .action(function(selector) {
-        apiRequest('/' + selector + '/start');
+        apiPostRequest('/' + selector + '/start');
     });
 
 program
     .command('restart <selector>')
     .description('Restart workers specified by uid, type or all keyword')
     .action(function(selector) {
-        apiRequest('/' + selector + '/restart');
+        apiPostRequest('/' + selector + '/restart');
     });
 
 program
     .command('stop <selector>')
     .description('Stop workers specified by uid, type or all keyword')
     .action(function(selector) {
-        apiRequest('/' + selector + '/stop');
+        apiPostRequest('/' + selector + '/stop');
     });
 
 program
     .command('reset <selector>')
     .description('Reset stat data for worker specified by uid, type or all keyword')
     .action(function(selector) {
-        apiRequest('/' + selector + '/reset');
+        apiPostRequest('/' + selector + '/reset');
     });
 
 program
     .command('remove <selector>')
     .description('Remove stopped process from stats by uid of type')
     .action(function(selector) {
-        apiRequest('/' + selector + '/remove');
+        apiPostRequest('/' + selector + '/remove');
     });
 
 program.parse(process.argv);
@@ -92,30 +92,54 @@ function getUserConfig() {
 }
 
 /**
- * Make a request to cluster api
+ * Make a get request to cluster api
  *
  * @param  {String} path
  */
-function apiRequest(path) {
-    var url = 'http://' + config.host + ':' + config.port
-        + path
-        + '?secret=' + config.secret;
+function apiGetRequest(path) {
+    request(formUrl(path), handleResponse);
+}
 
-    request(url, function(err, response, body) {
-        if (err) {
-            return console.log('' + err);
-        }
-        if (response.statusCode != 200) {
-            return console.log(body);
-        }
+/**
+ * Make a post request to cluster api
+ *
+ * @param  {String} path
+ */
+function apiPostRequest(path) {
+    request.post(formUrl(path), handleResponse);
+}
 
-        var data = JSON.parse(body);
-        if (!data || (Array.isArray(data) && !data.length)) {
-            console.log('No results');
-        } else {
-            printStat(data);
-        }
-    });
+/**
+ * Handler for responses from api
+ *
+ * @param {Error} err
+ * @param {Response} response
+ * @param {String} body
+ */
+function handleResponse(err, response, body) {
+    if (err) {
+        return console.log('' + err);
+    }
+    if (response.statusCode != 200) {
+        return console.log(body);
+    }
+
+    var data = JSON.parse(body);
+    if (!data || (Array.isArray(data) && !data.length)) {
+        console.log('No results');
+    } else {
+        printStat(data);
+    }
+}
+
+/**
+ * Form full url from the path
+ *
+ * @param {String} path
+ * @return {String}
+ */
+function formUrl(path) {
+    return 'http://' + config.host + ':' + config.port + path;
 }
 
 /**
@@ -141,10 +165,10 @@ function printStat(data) {
     var headers = {
         uid: 'uid',
         id: 'id',
-        type: 'type',
         pid: 'pid',
         restarted: 'crash',
         errors: 'err',
+        memory: 'memory',
         warnings: 'warn',
         status: 'status',
         uptime: 'uptime'
@@ -152,26 +176,24 @@ function printStat(data) {
 
     console.log();
     console.log(colors.grey(sprintf(
-        '%(uid)12s%(id)8s%(type)10s%(pid)8s%(restarted)8s'
-            + '%(errors)8s%(warnings)8s%(status)10s%(uptime)16s',
+        '%(uid)16s%(id)7s%(pid)10s%(restarted)8s'
+            + '%(errors)8s%(warnings)8s%(memory)13s%(uptime)14s',
         headers
     )));
     console.log();
     data.forEach(function(entry) {
-        process.stdout.write(sprintf('%(uid)12s', entry));
+        process.stdout.write(sprintf('%(uid)16s', entry));
 
         if (entry.id) {
-            process.stdout.write(colors.grey(sprintf('%(id)8s', entry)));
+            process.stdout.write(colors.grey(sprintf('%(id)7s', entry)));
         } else {
-            process.stdout.write(colors.grey(sprintf('%8s', '')));
+            process.stdout.write(colors.grey(sprintf('%7s', '')));
         }
 
-        process.stdout.write(colors.grey(sprintf('%(type)10s', entry)));
-
         if (entry.pid) {
-            process.stdout.write(colors.grey(sprintf('%(pid)8s', entry)));
+            process.stdout.write(colors.green(sprintf('%(pid)10s', entry)));
         } else {
-            process.stdout.write(colors.grey(sprintf('%8s', '')));
+            process.stdout.write(colors.red(sprintf('%10s', 'offline')));
         }
 
         if (entry.restarted === 0) {
@@ -192,16 +214,16 @@ function printStat(data) {
             process.stdout.write(colors.grey(sprintf('%(warnings)8s', entry)));
         }
 
-        if (entry.status == 'online') {
-            process.stdout.write(colors.green(sprintf('%(status)10s', entry)));
+        if (entry.memory !== undefined) {
+            process.stdout.write(colors.grey(sprintf('%(memory)13s', entry)));
         } else {
-            process.stdout.write(colors.red(sprintf('%(status)10s', entry)));
+            process.stdout.write(colors.grey(sprintf('%13s', '')));
         }
 
         if (entry.uptime) {
-            process.stdout.write(colors.yellow(sprintf('%(uptime)16s', entry)));
+            process.stdout.write(colors.yellow(sprintf('%(uptime)14s', entry)));
         } else {
-            process.stdout.write(colors.grey(sprintf('%16s', '')));
+            process.stdout.write(colors.grey(sprintf('%14s', '')));
         }
 
         process.stdout.write('\n');
