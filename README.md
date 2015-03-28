@@ -19,7 +19,7 @@ npm install --save project-cluster
 ```
 And use it
 ```js
-var process = Cluster.create({
+var cluster = Cluster.create({
     config: {
         // let's add 4 api workers and 2 bg
         apps: {
@@ -34,7 +34,7 @@ var process = Cluster.create({
         callback();
     }
 });
-process.start();
+cluster.start();
 ```
 
 ## How to use
@@ -116,11 +116,8 @@ Restarts all workers or workers of given type, if specified.
 };
 ```
 
-## Rest API
-
-## Command line util
-
-## Under the hood
+## Rest API, Command line util, Under the hood
+TODO at the moment.
 
 ## Contributing
 Found a bug, have a feature proposal or want to add a pull request? All are welcome. Just go to issues and write it down.

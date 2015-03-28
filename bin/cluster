@@ -164,36 +164,34 @@ function printStat(data) {
 
     var headers = {
         uid: 'uid',
-        id: 'id',
         pid: 'pid',
         restarted: 'crash',
         errors: 'err',
         memory: 'memory',
         warnings: 'warn',
-        status: 'status',
         uptime: 'uptime'
     };
 
     console.log();
     console.log(colors.grey(sprintf(
-        '%(uid)16s%(id)7s%(pid)10s%(restarted)8s'
+        '%(uid)28s%(pid)10s%(restarted)8s'
             + '%(errors)8s%(warnings)8s%(memory)13s%(uptime)14s',
         headers
     )));
     console.log();
     data.forEach(function(entry) {
-        process.stdout.write(sprintf('%(uid)16s', entry));
-
-        if (entry.id) {
-            process.stdout.write(colors.grey(sprintf('%(id)7s', entry)));
-        } else {
-            process.stdout.write(colors.grey(sprintf('%7s', '')));
+        if (entry.uid.length > 28) {
+            entry.uid = entry.uid.substr(0, 9) + '...'
+                + entry.uid.substr(entry.uid.length - 16)
+            ;
         }
 
+        process.stdout.write(sprintf('%(uid)28s', entry));
+
         if (entry.pid) {
-            process.stdout.write(colors.green(sprintf('%(pid)10s', entry)));
+            process.stdout.write(colors.grey(sprintf('%(pid)10s', entry)));
         } else {
-            process.stdout.write(colors.red(sprintf('%10s', 'offline')));
+            process.stdout.write(colors.grey(sprintf('%10s', '')));
         }
 
         if (entry.restarted === 0) {
@@ -223,7 +221,7 @@ function printStat(data) {
         if (entry.uptime) {
             process.stdout.write(colors.yellow(sprintf('%(uptime)14s', entry)));
         } else {
-            process.stdout.write(colors.grey(sprintf('%14s', '')));
+            process.stdout.write(colors.red(sprintf('%14s', 'offline')));
         }
 
         process.stdout.write('\n');
