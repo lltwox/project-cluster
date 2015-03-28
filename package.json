@@ -1,6 +1,6 @@
 {
   "name": "project-cluster",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Module to watch over different processes, that application consists of",
   "homepage": "https://github.com/lltwox/project-cluster",
   "keywords": [
