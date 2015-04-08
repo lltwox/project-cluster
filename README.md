@@ -108,6 +108,12 @@ Restarts all workers or workers of given type, if specified.
         // Time to wait before crashed worker should be restarted.
         restart: 2000
     },
+    // There are two suppoerted ways to spawn new processes: `cluster` and
+    // `child`. First one forks all processes, using node's cluster module. 
+    // It allows for all processes to share ports, if needed. Second way
+    // uses child_process' fork – a better options, when you don't need 
+    // shared ports.
+    spawn: 'cluster',
     // Hash of apps, that should be added at the start.
     // Each key is type of the app, value is number of workers to add.
     // If -1 is specified, there will be same number of workers as
