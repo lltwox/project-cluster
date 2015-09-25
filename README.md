@@ -20,19 +20,19 @@ npm install --save project-cluster
 And use it
 ```js
 var cluster = Cluster.create({
-    config: {
-        // let's add 4 api workers and 2 bg
-        apps: {
-            api: 4,
-            bg: 2
-        }
-    },
-    // define method to create our workers
-    start: function(type, callback) {
-        require('./apps/' + type); // ./apps/api.js is api worker
-                                   // ./apps/bg.js is email-sender
-        callback();
+  config: {
+    // let's add 4 api workers and 2 bg
+    apps: {
+      api: 4,
+      bg: 2
     }
+  },
+  // define method to create our workers
+  start: function(type, callback) {
+    require('./apps/' + type); // ./apps/api.js is api worker
+                               // ./apps/bg.js is email-sender
+    callback();
+  }
 });
 cluster.start();
 ```
@@ -78,47 +78,47 @@ Restarts all workers or workers of given type, if specified.
 
 ```js
 {
-    // Base name for process (affects `ps aux` results)
-    name: 'clustered-app',
-    // Log settings. By default `project-logger` module is used for logging.
-    // `false` value will disable logging. User defined
-    // `function(message, severity)` can be given as a value.
-    log: {
-        'name': 'cluster'
-    },
-    // Setting for rest api. Command line util also uses this api
-    // If you enable api, make sure it is properly secured (iptables,
-    // http-auth, something better).
-    api: {
-        // Whether api is enabled
-        enabled: true,
-        // Host and port to run http server on
-        host: '127.0.0.1',
-        port: 8887
-    },
+  // Base name for process (affects `ps aux` results)
+  name: 'clustered-app',
+  // Log settings. By default `project-logger` module is used for logging.
+  // `false` value will disable logging. User defined
+  // `function(message, severity)` can be given as a value.
+  log: {
+    'name': 'cluster'
+  },
+  // Setting for rest api. Command line util also uses this api
+  // If you enable api, make sure it is properly secured (iptables,
+  // http-auth, something better).
+  api: {
+    // Whether api is enabled
+    enabled: true,
+    // Host and port to run http server on
+    host: '127.0.0.1',
+    port: 8887
+  },
 
-    // Timeouts for worker management.
-    timeout: {
-        // Time, given for worker to start.  If worker does not start
-        // in given time, it is removed and  error is returned.
-        start: 5000,
-        // Time, given for worker to shutdown. If it runs out,
-        // worker is forcefully killed.
-        kill: 5000,
-        // Time to wait before crashed worker should be restarted.
-        restart: 2000
-    },
-    // There are two suppoerted ways to spawn new processes: `cluster` and
-    // `child`. First one forks all processes, using node's cluster module. 
-    // It allows for all processes to share ports, if needed. Second way
-    // uses child_process' fork – a better options, when you don't need 
-    // shared ports.
-    spawn: 'cluster',
-    // Hash of apps, that should be added at the start.
-    // Each key is type of the app, value is number of workers to add.
-    // If -1 is specified, there will be same number of workers as
-    // number of cores in cpu.
-    apps: {}
+  // Timeouts for worker management.
+  timeout: {
+    // Time, given for worker to start.  If worker does not start
+    // in given time, it is removed and  error is returned.
+    start: 5000,
+    // Time, given for worker to shutdown. If it runs out,
+    // worker is forcefully killed.
+    kill: 5000,
+    // Time to wait before crashed worker should be restarted.
+    restart: 2000
+  },
+  // There are two suppoerted ways to spawn new processes: `cluster` and
+  // `child`. First one forks all processes, using node's cluster module. 
+  // It allows for all processes to share ports, if needed. Second way
+  // uses child_process' fork – a better options, when you don't need 
+  // shared ports.
+  spawn: 'cluster',
+  // Hash of apps, that should be added at the start.
+  // Each key is type of the app, value is number of workers to add.
+  // If -1 is specified, there will be same number of workers as
+  // number of cores in cpu.
+  apps: {}
 };
 ```
 
