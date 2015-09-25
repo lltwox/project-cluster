@@ -23,24 +23,21 @@
     "type": "git",
     "url": "https://github.com/lltwox/project-cluster.git"
   },
-  "scripts": {
-    "test": "NODE_ENV=test ./node_modules/.bin/mocha --reporter dot"
-  },
   "license": "MIT",
   "dependencies": {
-    "async": "^0.8.0",
-    "colors": "^0.6.2",
+    "async": "^1.4.2",
+    "colors": "^1.1.2",
     "commander": "^2.2.0",
     "express": "^4.2.0",
-    "lodash": "^2.4.1",
+    "lodash": "^3.10.1",
     "moment": "^2.6.0",
-    "project-logger": "^1.0.2",
+    "project-logger": "^2.1.0",
     "request": "^2.36.0",
-    "sprintf-js": "0.0.7"
+    "sprintf-js": "1.0.3"
   },
   "devDependencies": {
-    "mocha": "^1.18.2",
-    "should": "^3.3.1"
+    "mocha": "^2.3.3",
+    "should": "^7.1.0"
   },
   "engines": {
     "node": ">=0.10"
